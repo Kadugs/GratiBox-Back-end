@@ -20,7 +20,7 @@ describe("POST /sign-up", () => {
       name: faker.name.findName(),
       email: "asd",
       password,
-      repeatPassword: password,
+      confirmPassword: password,
     };
     const result = await supertest(app)
       .post("/sign-up")
@@ -34,7 +34,7 @@ describe("POST /sign-up", () => {
       name: faker.name.findName(),
       email: "test@email.com",
       password,
-      repeatPassword: password,
+      confirmPassword: password,
     };
     const result = await supertest(app)
       .post("/sign-up")
@@ -48,7 +48,7 @@ describe("POST /sign-up", () => {
       name: faker.name.findName(),
       email: faker.internet.email(),
       password,
-      repeatPassword: password,
+      confirmPassword: password,
     };
     const result = await supertest(app)
       .post("/sign-up")
