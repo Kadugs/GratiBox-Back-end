@@ -1,48 +1,44 @@
-import supertest from "supertest";
-import app from "../src/app.js";
-import connection from "../src/database.js";
-import faker from "faker";
+import supertest from 'supertest';
+import faker from 'faker';
+import app from '../src/app.js';
+import connection from '../src/database.js';
 
-describe("POST /sign-up", () => {
+describe('POST /sign-up', () => {
   beforeAll(async () => {
     await connection.query(`
       INSERT INTO clients (name, email, password) 
-      VALUES ('testUser', 'test@email.com', 'testPassword')`)
+      VALUES ('testUser', 'test@email.com', 'testPassword')`);
   });
   afterAll(async () => {
     await connection.query(`
-      DELETE FROM clients`)
+      DELETE FROM clients`);
   });
-  
-  it("should return 400 for invalid parameters", async () => {
+
+  it('should return 400 for invalid parameters', async () => {
     const password = faker.internet.password();
     const body = {
       name: faker.name.findName(),
-      email: "asd",
+      email: 'asd',
       password,
       confirmPassword: password,
     };
-    const result = await supertest(app)
-      .post("/sign-up")
-      .send(body);
+    const result = await supertest(app).post('/sign-up').send(body);
     expect(result.status).toEqual(400);
   });
 
-  it("should return 409 for conflict email", async () => {
+  it('should return 409 for conflict email', async () => {
     const password = faker.internet.password();
     const body = {
       name: faker.name.findName(),
-      email: "test@email.com",
+      email: 'test@email.com',
       password,
       confirmPassword: password,
     };
-    const result = await supertest(app)
-      .post("/sign-up")
-      .send(body);
+    const result = await supertest(app).post('/sign-up').send(body);
     expect(result.status).toEqual(409);
   });
 
-  it("should return 201 for valid params", async () => {
+  it('should return 201 for valid params', async () => {
     const password = faker.internet.password();
     const body = {
       name: faker.name.findName(),
@@ -50,10 +46,7 @@ describe("POST /sign-up", () => {
       password,
       confirmPassword: password,
     };
-    const result = await supertest(app)
-      .post("/sign-up")
-      .send(body);
+    const result = await supertest(app).post('/sign-up').send(body);
     expect(result.status).toEqual(201);
   });
-
 });
