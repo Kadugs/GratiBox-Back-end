@@ -5,7 +5,6 @@ import { v4 as uuid } from 'uuid';
 
 async function signUp(req, res) {
   const { name, email, password, confirmPassword } = req.body;
-  console.log(name, email, password, confirmPassword);
   if (!isSignUpValid(req.body)) return res.sendStatus(400);
   const passwordHash = bcrypt.hashSync(password, 10);
 
