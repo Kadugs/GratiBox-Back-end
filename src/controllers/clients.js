@@ -48,6 +48,7 @@ async function signIn(req, res) {
        WHERE user_id = $1;`,
       [user.id],
     );
+    
     const session = findSession.rows[0];
 
     const newToken = uuid();

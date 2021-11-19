@@ -3,12 +3,19 @@ import bcrypt from 'bcrypt';
 import faker from 'faker';
 import app from '../src/app.js';
 import connection from '../src/database.js';
+import axios from 'axios';
 
 describe('POST /sign-up', () => {
   beforeAll(async () => {
     await connection.query(`
       INSERT INTO clients (name, email, password) 
-      VALUES ('testUser', 'test@email.com', 'testPassword');`);
+      VALUES ('testUser', 'signup@email.com', 'testPassword');`);
+  });
+    afterAll(async () => {
+    await connection.query(`
+      DELETE FROM sessions;
+      DELETE FROM clients;
+      `);
   });
 
   it('should return 400 for invalid parameters', async () => {
@@ -27,7 +34,7 @@ describe('POST /sign-up', () => {
     const password = faker.internet.password();
     const body = {
       name: faker.name.findName(),
-      email: 'test@email.com',
+      email: 'signup@email.com',
       password,
       confirmPassword: password,
     };
@@ -48,26 +55,18 @@ describe('POST /sign-up', () => {
   });
 });
 describe('POST /sign-in', () => {
-    beforeAll(async () => {
+  beforeAll(async () => {
+    const passwordHash = bcrypt.hashSync('testPassword', 10);
     await connection.query(`
-      INSERT INTO clients (name, email, password) 
-      VALUES ('testUser', 'test@email.com', 'testPassword');`);
+    INSERT INTO clients (name, email, password)
+    VALUES ('testname', 'signin@email.com', '${passwordHash}');
+    `)
   });
-    afterAll(async () => {
+  afterAll(async () => {
     await connection.query(`
       DELETE FROM sessions;
       DELETE FROM clients;
       `);
-  });
-  const passwordHash = bcrypt.hashSync('testPassword', 10);
-  beforeAll(async () => {
-    await connection.query(`
-      INSERT INTO clients (name, email, password) 
-      VALUES ('testUser', 'test@email.com', '${passwordHash}')`);
-  });
-  afterAll(async () => {
-    await connection.query(`
-      DELETE FROM clients`);
   });
 
   it('should return 400 for invalid parameters', async () => {
@@ -89,7 +88,7 @@ describe('POST /sign-in', () => {
   });
     it('should return 401 for incorret password', async () => {
     const body = {
-      email: 'test@email.com',
+      email: 'signin@email.com',
       password: 'wrongPassword',
     };
     const result = await supertest(app).post('/sign-in').send(body);
@@ -98,7 +97,7 @@ describe('POST /sign-in', () => {
 
   it('should return 200 for valid params', async () => {
     const body = {
-      email: 'test@email.com',
+      email: 'signin@email.com',
       password: 'testPassword',
     };
     const result = await supertest(app).post('/sign-in').send(body);
