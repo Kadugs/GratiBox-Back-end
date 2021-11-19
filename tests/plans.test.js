@@ -1,13 +1,13 @@
 /* eslint-disable no-undef */
 import supertest from 'supertest';
 import bcrypt from 'bcrypt';
-import faker from 'faker';
 import { v4 as uuid } from 'uuid';
 import app from '../src/app.js';
 import connection from '../src/database.js';
 
 describe('GET /plans', () => {
   const token = uuid();
+  const wrongToken = uuid();
   beforeAll(async () => {
     const passwordHash = bcrypt.hashSync('testPassword', 10);
     await connection.query(`
@@ -21,8 +21,8 @@ describe('GET /plans', () => {
     );
     await connection.query(
       `INSERT
-          INTO sessions (user_id, token)
-          VALUES ('${user.rows[0].id}', '${token}')`
+        INTO sessions (user_id, token)
+        VALUES ('${user.rows[0].id}', '${token}')`
     );
   });
 
@@ -34,17 +34,16 @@ describe('GET /plans', () => {
   });
 
   it('should return 401 for invalid token', async () => {
-    const wrongToken = uuid();
     const result = await supertest(app)
       .get('/plans')
-      .set('authorization', 'Bearer ' + wrongToken);
-    expect(result.status).toEqual(401);
+      .set('authorization', `Bearer ${wrongToken}`);
+    expect(result.statusCode).toEqual(401);
   });
 
   it('should return 200 for invalid token', async () => {
     const result = await supertest(app)
       .get('/plans')
-      .set('authorization', 'Bearer ' + token);
-    expect(result.status).toEqual(200);
+      .set('authorization', `Bearer ${token}`);
+    expect(result.statusCode).toEqual(200);
   });
 });

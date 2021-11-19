@@ -2,7 +2,6 @@
 import supertest from 'supertest';
 import bcrypt from 'bcrypt';
 import faker from 'faker';
-import { v4 as uuid } from 'uuid';
 import app from '../src/app.js';
 import connection from '../src/database.js';
 
@@ -25,7 +24,7 @@ describe('POST /sign-up', () => {
       name: faker.name.findName(),
       email: 'asd',
       password,
-      confirmPassword: password,
+      confirmPassword: password
     };
     const result = await supertest(app).post('/sign-up').send(body);
     expect(result.status).toEqual(400);
@@ -37,7 +36,7 @@ describe('POST /sign-up', () => {
       name: faker.name.findName(),
       email: 'signup@email.com',
       password,
-      confirmPassword: password,
+      confirmPassword: password
     };
     const result = await supertest(app).post('/sign-up').send(body);
     expect(result.status).toEqual(409);
@@ -49,7 +48,7 @@ describe('POST /sign-up', () => {
       name: faker.name.findName(),
       email: faker.internet.email(),
       password,
-      confirmPassword: password,
+      confirmPassword: password
     };
     const result = await supertest(app).post('/sign-up').send(body);
     expect(result.status).toEqual(201);
@@ -73,7 +72,7 @@ describe('POST /sign-in', () => {
   it('should return 400 for invalid parameters', async () => {
     const password = faker.internet.password();
     const body = {
-      password,
+      password
     };
     const result = await supertest(app).post('/sign-in').send(body);
     expect(result.status).toEqual(400);
@@ -82,7 +81,7 @@ describe('POST /sign-in', () => {
   it('should return 404 for incorret email', async () => {
     const body = {
       email: 'wrong@email.com',
-      password: 'testPassword',
+      password: 'testPassword'
     };
     const result = await supertest(app).post('/sign-in').send(body);
     expect(result.status).toEqual(404);
@@ -90,7 +89,7 @@ describe('POST /sign-in', () => {
   it('should return 401 for incorret password', async () => {
     const body = {
       email: 'signin@email.com',
-      password: 'wrongPassword',
+      password: 'wrongPassword'
     };
     const result = await supertest(app).post('/sign-in').send(body);
     expect(result.status).toEqual(401);
@@ -99,7 +98,7 @@ describe('POST /sign-in', () => {
   it('should return 200 for valid params', async () => {
     const body = {
       email: 'signin@email.com',
-      password: 'testPassword',
+      password: 'testPassword'
     };
     const result = await supertest(app).post('/sign-in').send(body);
     expect(result.status).toEqual(200);

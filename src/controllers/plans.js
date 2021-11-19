@@ -6,13 +6,14 @@ async function getPlans(req, res) {
   try {
     const userPlan = await connection.query(
       `
-        SELECT plans.type AS "planType", delivery_days.day AS day, products.name AS "productName"
+        SELECT plans.type AS "planType", delivery_days.day AS day, products.name AS "productName", subscriptions.date
         FROM clients
         JOIN sessions ON sessions.user_id = clients.id
         LEFT JOIN subscriptions ON subscriptions.user_id = clients.id
         LEFT JOIN plans ON plans.id = subscriptions.plan_id
         LEFT JOIN delivery_days ON delivery_days.id = subscriptions.delivery_id
-        LEFT JOIN products ON products.id = subscriptions.product_id
+        LEFT JOIN user_products ON user_products.user_id = clients.id
+        LEFT JOIN products ON products.id = user_products.product_id
         WHERE sessions.token = $1
         `,
       [token]

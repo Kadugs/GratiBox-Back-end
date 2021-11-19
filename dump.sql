@@ -15,7 +15,6 @@ CREATE TABLE "subscriptions" (
 	"user_id" integer NOT NULL,
 	"plan_id" integer NOT NULL,
 	"delivery_id" integer NOT NULL,
-	"product_id" integer NOT NULL,
 	"date" DATE NOT NULL,
 	CONSTRAINT "subscriptions_pk" PRIMARY KEY ("id")
 ) WITH (
@@ -79,11 +78,21 @@ CREATE TABLE "sessions" (
 
 
 
+CREATE TABLE "user_products" (
+	"id" serial NOT NULL,
+	"user_id" integer NOT NULL,
+	"product_id" integer NOT NULL,
+	CONSTRAINT "user_products_pk" PRIMARY KEY ("id")
+) WITH (
+  OIDS=FALSE
+);
+
+
+
 
 ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_fk0" FOREIGN KEY ("user_id") REFERENCES "clients"("id");
 ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_fk1" FOREIGN KEY ("plan_id") REFERENCES "plans"("id");
 ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_fk2" FOREIGN KEY ("delivery_id") REFERENCES "delivery_days"("id");
-ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_fk3" FOREIGN KEY ("product_id") REFERENCES "products"("id");
 
 
 
@@ -91,6 +100,10 @@ ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_fk3" FOREIGN KEY ("pro
 ALTER TABLE "delivery_data" ADD CONSTRAINT "delivery_data_fk0" FOREIGN KEY ("user_id") REFERENCES "clients"("id");
 
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_fk0" FOREIGN KEY ("user_id") REFERENCES "clients"("id");
+
+ALTER TABLE "user_products" ADD CONSTRAINT "user_products_fk0" FOREIGN KEY ("user_id") REFERENCES "clients"("id");
+ALTER TABLE "user_products" ADD CONSTRAINT "user_products_fk1" FOREIGN KEY ("product_id") REFERENCES "products"("id");
+
 
 
 
