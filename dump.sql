@@ -1,4 +1,4 @@
-CREATE TABLE "public.clients" (
+CREATE TABLE "clients" (
 	"id" serial NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"email" varchar(255) NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE "public.clients" (
 
 
 
-CREATE TABLE "public.subscriptions" (
+CREATE TABLE "subscriptions" (
 	"id" serial NOT NULL,
 	"user_id" integer NOT NULL,
 	"plan_id" integer NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE "public.subscriptions" (
 
 
 
-CREATE TABLE "public.plans" (
+CREATE TABLE "plans" (
 	"id" serial NOT NULL,
 	"type" varchar(255) NOT NULL UNIQUE,
 	CONSTRAINT "plans_pk" PRIMARY KEY ("id")
@@ -34,7 +34,7 @@ CREATE TABLE "public.plans" (
 
 
 
-CREATE TABLE "public.delivery_days" (
+CREATE TABLE "delivery_days" (
 	"id" serial NOT NULL,
 	"day" varchar(255) NOT NULL UNIQUE,
 	CONSTRAINT "delivery_days_pk" PRIMARY KEY ("id")
@@ -44,7 +44,7 @@ CREATE TABLE "public.delivery_days" (
 
 
 
-CREATE TABLE "public.products" (
+CREATE TABLE "products" (
 	"id" serial NOT NULL,
 	"name" varchar(255) NOT NULL UNIQUE,
 	CONSTRAINT "products_pk" PRIMARY KEY ("id")
@@ -54,7 +54,7 @@ CREATE TABLE "public.products" (
 
 
 
-CREATE TABLE "public.delivery_data" (
+CREATE TABLE "delivery_data" (
 	"id" serial NOT NULL,
 	"user_id" integer NOT NULL,
 	"address" varchar(255) NOT NULL,
@@ -68,7 +68,7 @@ CREATE TABLE "public.delivery_data" (
 
 
 
-CREATE TABLE "public.sessions" (
+CREATE TABLE "sessions" (
 	"id" serial NOT NULL,
 	"user_id" integer NOT NULL,
 	"token" uuid NOT NULL UNIQUE,

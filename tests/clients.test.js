@@ -1,9 +1,10 @@
+/* eslint-disable no-undef */
 import supertest from 'supertest';
 import bcrypt from 'bcrypt';
 import faker from 'faker';
+import { v4 as uuid } from 'uuid';
 import app from '../src/app.js';
 import connection from '../src/database.js';
-import axios from 'axios';
 
 describe('POST /sign-up', () => {
   beforeAll(async () => {
@@ -11,7 +12,7 @@ describe('POST /sign-up', () => {
       INSERT INTO clients (name, email, password) 
       VALUES ('testUser', 'signup@email.com', 'testPassword');`);
   });
-    afterAll(async () => {
+  afterAll(async () => {
     await connection.query(`
       DELETE FROM sessions;
       DELETE FROM clients;
@@ -60,7 +61,7 @@ describe('POST /sign-in', () => {
     await connection.query(`
     INSERT INTO clients (name, email, password)
     VALUES ('testname', 'signin@email.com', '${passwordHash}');
-    `)
+    `);
   });
   afterAll(async () => {
     await connection.query(`
@@ -86,7 +87,7 @@ describe('POST /sign-in', () => {
     const result = await supertest(app).post('/sign-in').send(body);
     expect(result.status).toEqual(404);
   });
-    it('should return 401 for incorret password', async () => {
+  it('should return 401 for incorret password', async () => {
     const body = {
       email: 'signin@email.com',
       password: 'wrongPassword',

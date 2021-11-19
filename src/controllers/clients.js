@@ -10,13 +10,16 @@ async function signUp(req, res) {
   const passwordHash = bcrypt.hashSync(password, 10);
 
   try {
-    const registeredEmails = await connection.query('SELECT email FROM clients');
-    if (registeredEmails?.rows.some((item) => item.email === email)) return res.sendStatus(409);
+    const registeredEmails = await connection.query(
+      'SELECT email FROM clients'
+    );
+    if (registeredEmails?.rows.some((item) => item.email === email))
+      return res.sendStatus(409);
     await connection.query(
       `INSERT 
        INTO clients (name, email, password) 
        VALUES ($1, $2, $3)`,
-      [name, email, passwordHash],
+      [name, email, passwordHash]
     );
     return res.sendStatus(201);
   } catch (err) {
@@ -26,7 +29,6 @@ async function signUp(req, res) {
 }
 
 async function signIn(req, res) {
-  
   const { email, password } = req.body;
   if (!email || !password) return res.sendStatus(400);
 
@@ -35,20 +37,21 @@ async function signIn(req, res) {
       `SELECT id, name, password 
        FROM clients
        WHERE email = $1;`,
-      [email],
+      [email]
     );
     const user = result.rows[0];
 
     if (!user) return res.sendStatus(404);
-    if (!bcrypt.compareSync(password, user.password)) return res.sendStatus(401);
+    if (!bcrypt.compareSync(password, user.password))
+      return res.sendStatus(401);
 
     const findSession = await connection.query(
       `SELECT * 
        FROM sessions
        WHERE user_id = $1;`,
-      [user.id],
+      [user.id]
     );
-    
+
     const session = findSession.rows[0];
 
     const newToken = uuid();
@@ -57,14 +60,14 @@ async function signIn(req, res) {
         `UPDATE sessions 
          SET token = $1
          WHERE user_id = $2;`,
-        [newToken, user.id],
+        [newToken, user.id]
       );
     } else {
       await connection.query(
         `INSERT 
          INTO sessions (user_id, token)
          VALUES ($1, $2);`,
-        [user.id, newToken],
+        [user.id, newToken]
       );
     }
 
