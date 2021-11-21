@@ -5,7 +5,8 @@ async function verifyToken(req, res, next) {
   const token = req.headers[newLocal]?.replace('Bearer ', '');
   try {
     const session = await connection.query(
-      `SELECT * FROM sessions WHERE token = '${token}'`
+      `SELECT * FROM sessions WHERE token = $1;`,
+      [token]
     );
     if (session.rowCount === 0) {
       return res.status(401);

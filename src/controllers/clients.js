@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 import bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
-import connection from '../database.js';
 import { isSignUpValid } from '../validation/signUp.js';
+import connection from '../database.js';
 
 async function signUp(req, res) {
   const { name, email, password } = req.body;
@@ -73,7 +73,7 @@ async function signIn(req, res) {
 
     return res.status(200).send({
       name: user.name,
-      token: newToken,
+      token: newToken
     });
   } catch (error) {
     console.log(error);

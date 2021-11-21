@@ -104,3 +104,6 @@ describe('POST /sign-in', () => {
     expect(result.status).toEqual(200);
   });
 });
+afterAll(() => {
+  connection.end();
+});
