@@ -9,11 +9,11 @@ async function verifyToken(req, res, next) {
       [token]
     );
     if (session.rowCount === 0) {
-      return res.status(401);
+      return res.sendStatus(401);
     }
     next();
   } catch (err) {
-    return res.status(500);
+    return res.sendStatus(500);
   }
 }
 

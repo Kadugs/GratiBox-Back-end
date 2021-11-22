@@ -6,17 +6,7 @@ import app from '../src/app.js';
 import connection from '../src/database.js';
 
 describe('POST /sign-up', () => {
-  beforeAll(async () => {
-    await connection.query(`
-      INSERT INTO clients (name, email, password) 
-      VALUES ('testUser', 'signup@email.com', 'testPassword');`);
-  });
-  afterAll(async () => {
-    await connection.query(`
-      DELETE FROM sessions;
-      DELETE FROM clients;
-      `);
-  });
+  const email = 'test@example.com';
 
   it('should return 400 for invalid parameters', async () => {
     const password = faker.internet.password();
@@ -30,28 +20,27 @@ describe('POST /sign-up', () => {
     expect(result.status).toEqual(400);
   });
 
-  it('should return 409 for conflict email', async () => {
-    const password = faker.internet.password();
-    const body = {
-      name: faker.name.findName(),
-      email: 'signup@email.com',
-      password,
-      confirmPassword: password
-    };
-    const result = await supertest(app).post('/sign-up').send(body);
-    expect(result.status).toEqual(409);
-  });
-
   it('should return 201 for valid params', async () => {
     const password = faker.internet.password();
     const body = {
       name: faker.name.findName(),
-      email: faker.internet.email(),
+      email: email,
       password,
       confirmPassword: password
     };
     const result = await supertest(app).post('/sign-up').send(body);
     expect(result.status).toEqual(201);
+  });
+  it('should return 409 for conflict email', async () => {
+    const password = faker.internet.password();
+    const body = {
+      name: faker.name.findName(),
+      email: email,
+      password,
+      confirmPassword: password
+    };
+    const result = await supertest(app).post('/sign-up').send(body);
+    expect(result.status).toEqual(409);
   });
 });
 describe('POST /sign-in', () => {
@@ -61,12 +50,6 @@ describe('POST /sign-in', () => {
     INSERT INTO clients (name, email, password)
     VALUES ('testname', 'signin@email.com', '${passwordHash}');
     `);
-  });
-  afterAll(async () => {
-    await connection.query(`
-      DELETE FROM sessions;
-      DELETE FROM clients;
-      `);
   });
 
   it('should return 400 for invalid parameters', async () => {
@@ -102,6 +85,12 @@ describe('POST /sign-in', () => {
     };
     const result = await supertest(app).post('/sign-in').send(body);
     expect(result.status).toEqual(200);
+  });
+  afterAll(async () => {
+    await connection.query(`
+      DELETE FROM sessions;
+      DELETE FROM clients;
+      `);
   });
 });
 afterAll(() => {

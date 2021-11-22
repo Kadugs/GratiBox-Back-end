@@ -179,7 +179,6 @@ async function addPlan(req, res) {
     `,
       [userId, address, cep, city, state]
     );
-    console.log(signPlan.plan, signPlan.shipment);
     createShipment(
       dayjs(),
       { plan: signPlan.plan, day: signPlan.shipment },
