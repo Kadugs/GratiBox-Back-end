@@ -1,7 +1,10 @@
 # GratiBox-Back-end
 Front-end on https://github.com/Kadugs/GratiBox-Front-end
 
-Running locally
+## Getting started
+
+### Running locally
+
 1- Clone this repo using git clone https://github.com/Kadugs/GratiBox-Front-end.git
 
 2- Install the npm packages `npm install`
