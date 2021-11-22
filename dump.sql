@@ -87,7 +87,14 @@ CREATE TABLE "user_products" (
   OIDS=FALSE
 );
 
-
+CREATE TABLE "shipments" (
+	"id" serial NOT NULL,
+	"user_id" integer NOT NULL,
+	"date" DATE NOT NULL,
+	CONSTRAINT "shipments_pk" PRIMARY KEY ("id")
+) WITH (
+  OIDS=FALSE
+);
 
 
 ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_fk0" FOREIGN KEY ("user_id") REFERENCES "clients"("id");
@@ -104,10 +111,22 @@ ALTER TABLE "sessions" ADD CONSTRAINT "sessions_fk0" FOREIGN KEY ("user_id") REF
 ALTER TABLE "user_products" ADD CONSTRAINT "user_products_fk0" FOREIGN KEY ("user_id") REFERENCES "clients"("id");
 ALTER TABLE "user_products" ADD CONSTRAINT "user_products_fk1" FOREIGN KEY ("product_id") REFERENCES "products"("id");
 
+ALTER TABLE "shipments" ADD CONSTRAINT "shipments_fk0" FOREIGN KEY ("user_id") REFERENCES "clients"("id");
 
-
-
-
-
-
-
+COPY public.delivery_days (id, day) FROM stdin;
+1	01
+2	10
+3	20
+4	segunda
+5	quarta
+6	sexta
+\.
+COPY public.plans (id, type) FROM stdin;
+1	semanal
+2	mensal
+\.
+COPY public.products (id, name) FROM stdin;
+1	tea
+2	incense
+3	organics
+\.

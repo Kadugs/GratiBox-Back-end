@@ -1,13 +1,49 @@
 import connection from '../database.js';
 import { isNewPlanValid } from '../validation/addPlan.js';
 import dayjs from 'dayjs';
+
+function takeDay(day) {
+  if (day.toLowerCase() === 'segunda') return 1;
+  if (day.toLowerCase() === 'quarta') return 3;
+  return 5;
+}
+
+async function createShipment(shipmentDay, signPlan, userId) {
+  let shipment = dayjs(shipmentDay).add(1, 'day');
+  if (signPlan.plan.toLowerCase() === 'mensal') {
+    let day = Number(signPlan.day);
+    while (dayjs(shipment).get('date') !== day) {
+      shipment = dayjs(shipment).add(1, 'day');
+    }
+    if (dayjs(shipment).get('day') === 0) {
+      shipment = dayjs(shipment).add(1, 'day');
+    } else if (dayjs(shipment).get('day') === 6) {
+      shipment = dayjs(shipment).add(2, 'day');
+    }
+  } else if (signPlan.plan.toLowerCase() === 'semanal') {
+    const dayCode = takeDay(signPlan.day);
+    while (dayjs(shipment).get('day') !== dayCode) {
+      shipment = dayjs(shipment).add(1, 'day');
+    }
+  } else {
+    return;
+  }
+  await connection.query(
+    `INSERT
+       INTO shipments (user_id, date)
+       VALUES ($1, $2)`,
+    [userId, shipment]
+  );
+}
+
 async function getPlans(req, res) {
   const newLocal = 'authorization';
   const token = req.headers[newLocal]?.replace('Bearer ', '');
   try {
     const userPlan = await connection.query(
       `
-        SELECT plans.type AS "planType", delivery_days.day AS day, products.name AS "productName", subscriptions.date
+        SELECT clients.id AS "userId", plans.type AS "planType", delivery_days.day AS day,
+          products.name AS "productName", subscriptions.date
         FROM clients
         JOIN sessions ON sessions.user_id = clients.id
         LEFT JOIN subscriptions ON subscriptions.user_id = clients.id
@@ -19,12 +55,57 @@ async function getPlans(req, res) {
         `,
       [token]
     );
-    return res.send(userPlan.rows).status(200);
+    if (!userPlan.rows[0].planType) return res.send(null).status(200);
+    const shipments = await connection.query(`
+    SELECT date FROM shipments WHERE user_id = ${userPlan.rows[0].userId};`);
+    let lastShipment = shipments.rows[shipments.rowCount - 1].date;
+    while (dayjs(lastShipment).diff(dayjs(), 'month') < 4) {
+      await createShipment(
+        lastShipment,
+        {
+          plan: userPlan.rows[0].planType,
+          day: userPlan.rows[0].day
+        },
+        userPlan.rows[0].userId
+      );
+      let newShipment = await connection.query(`
+        SELECT date
+        FROM shipments
+        WHERE
+        user_id = ${userPlan.rows[0].userId};`);
+      lastShipment = newShipment.rows[newShipment.rowCount - 1].date;
+    }
+    let nextShipments = shipments.rows.filter(
+      (shipment) =>
+        dayjs(shipment.date).get('date') > dayjs().get('date') &&
+        dayjs(shipment.date).get('month') === dayjs().get('month') &&
+        dayjs(shipment.date).get('year') === dayjs().get('year')
+    );
+    if (nextShipments.length === 0) {
+      nextShipments = shipments.rows.find(
+        (shipment) =>
+          dayjs(shipment.date).get('date') > dayjs().get('date') ||
+          dayjs(shipment.date).get('month') > dayjs().get('month')
+      );
+      nextShipments = [nextShipments];
+    }
+    const mappedShipments = nextShipments.map((item) => item.date);
+    const body = userPlan.rows.map((row) => {
+      return {
+        planType: row.planType,
+        day: row.day,
+        productName: row.productName,
+        date: row.date,
+        shipmentDates: mappedShipments
+      };
+    });
+    return res.send(body).status(200);
   } catch (err) {
     console.error(err);
     return res.sendStatus(500);
   }
 }
+
 function queryProducts(products, userId) {
   const template = (productId) => `
     INSERT
@@ -85,7 +166,9 @@ async function addPlan(req, res) {
       `,
       [userId, planId, deliveryId, dayjs()]
     );
+
     const query = queryProducts(signPlan.products, userId);
+    if (query === '') return res.sendStatus(400);
     await connection.query(query);
 
     await connection.query(
@@ -95,6 +178,12 @@ async function addPlan(req, res) {
     VALUES ($1, $2, $3, $4, $5);
     `,
       [userId, address, cep, city, state]
+    );
+    console.log(signPlan.plan, signPlan.shipment);
+    createShipment(
+      dayjs(),
+      { plan: signPlan.plan, day: signPlan.shipment },
+      userId
     );
 
     return res.sendStatus(200);
