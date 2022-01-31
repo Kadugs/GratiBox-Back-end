@@ -18,7 +18,7 @@ const databaseConfig = {
 };
 
 const connection = new Pool(
-  process.env.NODE_ENV !== 'production' || process.env.NODE_ENV === 'test'
+  process.env.NODE_ENV !== 'production'
     ? localConfig
     : databaseConfig
 );
